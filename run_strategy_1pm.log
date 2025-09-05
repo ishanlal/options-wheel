@@ -1,0 +1,40 @@
+[Managing existing put positions...]
+[Managing 2 open put positions]
+[BE250919P00046000: Stock=$54.87, Strike=$46.00, Premium=$1.85, Current=$0.78, P&L=$1.07, P&L%=57.8%]
+[USAR250912P00012500: Stock=$14.13, Strike=$12.50, Premium=$0.30, Current=$0.23, P&L=$0.07, P&L%=25.0%]
+[Closed 0 put positions out of 2 total]
+[Current buying power is $4150.0]
+[Searching for put options...]
+[Scoring put options...]
+[Selling put: PCG250912P00014500]
+Traceback (most recent call last):
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/alpaca/common/rest.py", line 198, in _one_request
+    response.raise_for_status()
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 422 Client Error: Unprocessable Entity for url: https://paper-api.alpaca.markets/v2/orders
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/bin/run-strategy", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/ishanklal/options_wheel/options-wheel/scripts/run_strategy.py", line 58, in main
+    sell_puts(client, allowed_symbols, buying_power, strat_logger)
+  File "/Users/ishanklal/options_wheel/options-wheel/core/execution.py", line 39, in sell_puts
+    client.market_sell(p.symbol)
+  File "/Users/ishanklal/options_wheel/options-wheel/core/broker_client.py", line 36, in market_sell
+    self.trade_client.submit_order(req)
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/alpaca/trading/client.py", line 100, in submit_order
+    response = self.post("/orders", data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/alpaca/common/rest.py", line 240, in post
+    return self._request("POST", path, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/alpaca/common/rest.py", line 131, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ishanklal/options_wheel/options-wheel/.venv/lib/python3.11/site-packages/alpaca/common/rest.py", line 207, in _one_request
+    raise APIError(error, http_error)
+alpaca.common.exceptions.APIError: {"code":42210000,"message":"options market orders are only allowed during market hours"}

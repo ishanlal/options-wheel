@@ -1,9 +1,9 @@
 from pathlib import Path
 from core.broker_client import BrokerClient
-from core.execution import sell_puts, sell_calls
+from core.execution import sell_puts, sell_calls, manage_open_puts
 from core.state_manager import update_state, calculate_risk
 from config.credentials import ALPACA_API_KEY, ALPACA_SECRET_KEY, IS_PAPER
-from config.params import MAX_RISK
+from config.params import MAX_RISK, PUT_TARGET_PCT
 from logging.strategy_logger import StrategyLogger
 from logging.logger_setup import setup_logger
 from core.cli_args import parse_args
@@ -29,14 +29,20 @@ def main():
         allowed_symbols = SYMBOLS
         buying_power = MAX_RISK
     else:
+        # First, manage existing put positions (risk management)
+        logger.info("Managing existing put positions...")
+        closed_puts = manage_open_puts(
+            client, 
+            target_pct=PUT_TARGET_PCT,  # Close at +/- 90% P&L
+            strat_logger=strat_logger
+        )
+        # Get updated positions after put management
         positions = client.get_positions()
         strat_logger.add_current_positions(positions)
-
         current_risk = calculate_risk(positions)
-        
         states = update_state(positions)
         strat_logger.add_state_dict(states)
-
+        # Manage covered calls for existing stock positions
         for symbol, state in states.items():
             if state["type"] == "long_shares":
                 sell_calls(client, symbol, state["price"], state["qty"], strat_logger)
@@ -46,8 +52,9 @@ def main():
     
     strat_logger.set_buying_power(buying_power)
     strat_logger.set_allowed_symbols(allowed_symbols)
-
     logger.info(f"Current buying power is ${buying_power}")
+
+    # Sell new puts with remaining buying power
     sell_puts(client, allowed_symbols, buying_power, strat_logger)
 
     strat_logger.save()    

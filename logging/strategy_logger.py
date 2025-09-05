@@ -69,10 +69,16 @@ class StrategyLogger:
                 self.log_entry["sold_puts"] = []
             self.log_entry["sold_puts"].append(put_dict)
 
+    def log_closed_puts(self, closed_puts):
+        """Log puts that were closed for risk management"""
+        if self.enabled:
+            if self.log_entry.get("closed_puts") is None:
+                self.log_entry["closed_puts"] = []
+            self.log_entry["closed_puts"].extend(closed_puts)
+
     def save(self):
         if not self.enabled:
             return
-
         # Load existing log data if file exists
         if self.log_file.exists():
             with open(self.log_file, "r") as f:
@@ -84,10 +90,8 @@ class StrategyLogger:
                     data = []
         else:
             data = []
-
         # Append the new log entry
         data.append(self.log_entry)
-        
         # Write the updated list back
         with open(self.log_file, "w") as f:
             json.dump(data, f, indent=2)
